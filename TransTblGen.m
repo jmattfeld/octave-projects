@@ -4,8 +4,8 @@ clear all; close all;
 pkg load image;
 
 % input files
-ss_data_file = "C:\\Users\\Jeremy.SV\\Documents\\Steady State Temperature Table From Cal 12-10-18.csv";
-trans_data_file = "C:\\Users\\Jeremy.SV\\Documents\\Transient Data Abbreviated 10 to 45 Degree.csv";
+ss_data_file = "Steady State Temperature Table From Cal 12-10-18.csv";
+trans_data_file = "Transient Data Abbreviated 10 to 45 Degree.csv";
 
 ss_data = dlmread(ss_data_file,',',"A1..D960");
 %trans_data = dlmread(trans_data_file,',',"A1..BT1000");
@@ -98,7 +98,7 @@ uGrp56(:,1) = (uGrp5(:,1) + uGrp6(:,1)) ./ 2;
 uGrp78(:,1) = (uGrp7(:,1) + uGrp8(:,1)) ./ 2;
 
 % put the Px matrix back together
-uPCx = [uGrp1(:,2:5) uGrp12(:,2:9) uGrp2(:,2:5) uGrp3(:,2:5) uGrp34(:,2:9) uGrp4(:,2:5) uGrp6(:,2:5) uGrp56(:,2:9) uGrp6(:,2:5) uGrp8(:,2:5) uGrp78(:,2:9) uGrp7(:,2:5)];
+uPCx = [uGrp1(:,2:5) uGrp12(:,2:9) uGrp2(:,2:5) uGrp3(:,2:5) uGrp34(:,2:9) uGrp4(:,2:5) uGrp6(:,2:5) uGrp56(:,2:9) uGrp5(:,2:5) uGrp8(:,2:5) uGrp78(:,2:9) uGrp7(:,2:5)];
 
 % calculate PST for each channel
 PSTx = zeros(428,64);
