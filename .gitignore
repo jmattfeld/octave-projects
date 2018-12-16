@@ -1,1 +1,4 @@
-TransTable.csv
+*.csv
+*.swp
+*.swo
+*.*~

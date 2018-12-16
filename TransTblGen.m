@@ -12,15 +12,23 @@ ss_data = dlmread(ss_data_file,',',"A1..D960");
 trans_data = csvread(trans_data_file);
 
 jDim = 15;
-sst3d = zeros(15,2,64);
+sst3d = zeros(15,4,64);
 coeffs = zeros(64,3);
 
 % separate the ss_data by px channel and calculate coeffs
 for k = 1:64
-   pxData = ss_data((k-1)*jDim + 1:(k-1)*jDim + jDim,3:4);
-   sst3d(:,:,k) = pxData;
-   %coeffs(k,:) = polyfit(pxData(:,2),pxData(:,1),2);
-   coeffs(k,:) = polyfit(pxData(2:11,2),pxData(2:11,1),2);
+    pxData = ss_data((k-1)*jDim + 1:(k-1)*jDim + jDim,3:4);
+    sst3d(:,1:2,k) = pxData;
+    %coeffs(k,:) = polyfit(pxData(:,2),pxData(:,1),2);
+    coeffs(k,:) = polyfit(pxData(2:11,2),pxData(2:11,1),2);
+endfor
+
+% calculate slope/intercept
+for i = 1:64 % for each channel
+    diffX = [0; diff(sst3d(:,2,i))];
+    diffY = [0; diff(sst3d(:,1,i))];
+    sst3d(2:15,3,i) = diffY(2:15) ./ diffX(2:15);
+    sst3d(2:15,4,i) = sst3d(2:15,1,i) - (sst3d(2:15,3,i) .* sst3d(2:15,2,i));
 endfor
 
 %% checking the fit
@@ -100,14 +108,30 @@ uGrp78(:,1) = (uGrp7(:,1) + uGrp8(:,1)) ./ 2;
 % put the Px matrix back together
 uPCx = [uGrp1(:,2:5) uGrp12(:,2:9) uGrp2(:,2:5) uGrp3(:,2:5) uGrp34(:,2:9) uGrp4(:,2:5) uGrp6(:,2:5) uGrp56(:,2:9) uGrp5(:,2:5) uGrp8(:,2:5) uGrp78(:,2:9) uGrp7(:,2:5)];
 
-% calculate PST for each channel
+%% calculate PST for each channel (polyfit method)
+%PSTx = zeros(428,64);
+%for i = 1:64
+%   a = coeffs(i,1);
+%   b = coeffs(i,2);
+%   c = coeffs(i,3);
+%   x = uPCx(:,i);
+%   PSTx(:,i) = a.*x.^2 + b.*x + c;
+%endfor
+
+% calculate PST for each channel (slope/intercept method)
 PSTx = zeros(428,64);
 for i = 1:64
-   a = coeffs(i,1);
-   b = coeffs(i,2);
-   c = coeffs(i,3);
    x = uPCx(:,i);
-   PSTx(:,i) = a.*x.^2 + b.*x + c;
+   for j = 1:428
+       for k = 2:15
+           if (uPCx(j,i) > sst3d(k,2,i))
+               m = sst3d(k,3,i);
+               b = sst3d(k,4,i);
+               PSTx(j,i) = m * uPCx(j,i) + b;
+               break
+           endif
+       endfor
+   endfor
 endfor
 
 %Tx averages
