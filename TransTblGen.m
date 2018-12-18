@@ -142,6 +142,8 @@ T7T8 = sum(Tx(:,7:8),2) ./ 2;
 
 % initialize output table
 transOut = zeros(428,128);
+tCor = zeros(428,64);
+tempin = zeros(428,64);
 
 % build output table
 for i = 1:64 % for each channel
@@ -175,8 +177,40 @@ for i = 1:64 % for each channel
 
    % PSTx column
    transOut(:,i*2) = PSTx(:,i);
+
+   % temp correction matrix
+   % TSTx - PSTx gets temp correction factor
+   tCor(:,i) = transOut(:,i*2-1) - transOut(:,i*2);
+   % tempin independent variable
+   tempin(:,i) = transOut(:,i*2-1);
+
 endfor
 
+% plot correction curves /wrt input temperature
+%ch1 - ch8
+figure(); hold on;
+plot(tempin(:,1:8),tCor(:,1:8));
+title("temperature correction factor \/wrt input temperature (Ch1-Ch8)");
+legend("Ch1","Ch2","Ch3","Ch4","Ch5","Ch6","Ch7","Ch8",'location','southwest');
+grid on;
+hold off;
+
+for i = 1:7
+   figure(); hold on;
+   plot(tempin(:,i*8+1:i*8+8),tCor(:,i*8+1:i*8+8));
+   title("temperature correction factor \/wrt input temperature");
+   grid on;
+   hold off;
+endfor
+
+%try polyfit one channel
+%tCorr_coeffs = zeros(64,5);
+%for k = 1:64
+%    tCorr_coeffs(k,:) = polyfit(tempin(k,:),tCor(k,:),5);
+%endfor
+
+
+% for transient table output CSV
 idx = transpose(linspace(0,427,428));
 transOut = [idx transOut];
 

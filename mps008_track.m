@@ -13,8 +13,8 @@ time = ftime./60;
 px_array = [1:64];
 
 % read excel data
-%xls_data = csvread("C:\\Users\\Jeremy.SV\\Documents\\DNW_TEST_RAW_11-12-18.csv");
-xls_data = csvread("C:\\Users\\jeremymelinda\\Documents\\DNW_TEST_RAW_11-12-18.csv");
+xls_data = csvread("C:\\Users\\Jeremy.SV\\Documents\\DNW_TEST_RAW_11-12-18.csv");
+%xls_data = csvread("C:\\Users\\jeremymelinda\\Documents\\DNW_TEST_RAW_11-12-18.csv");
 
 % extract oven_setpoint, oven_temp and mps_avg_temp
 oven_setpoint = xls_data(10:2709,3);
