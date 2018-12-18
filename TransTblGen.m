@@ -1,11 +1,18 @@
 % TransTblGen.m
 
 clear all; close all;
+
+% load image package for padarray
 pkg load image;
 
+% declare some path variables
+wkDir = "C:\\Users\\Jeremy.SV\\Documents\\octave-projects\\";
+inpDir = [wkDir "data\\"];
+outpDir = [wkDir "outputs\\"];
+
 % input files
-ss_data_file = "Steady State Temperature Table From Cal 12-10-18.csv";
-trans_data_file = "Transient Data Abbreviated 10 to 45 Degree.csv";
+ss_data_file = [inpDir "Steady State Temperature Table From Cal 12-10-18.csv"];
+trans_data_file = [inpDir "Transient Data Abbreviated 10 to 45 Degree.csv"];
 
 ss_data = dlmread(ss_data_file,',',"A1..D960");
 %trans_data = dlmread(trans_data_file,',',"A1..BT1000");
@@ -31,20 +38,9 @@ for i = 1:64 % for each channel
     sst3d(2:15,4,i) = sst3d(2:15,1,i) - (sst3d(2:15,3,i) .* sst3d(2:15,2,i));
 endfor
 
-%% checking the fit
-%x = linspace(-270000,90000,1000);
-%y = coeffs(1,1).*x.^2 + coeffs(1,2).*x + coeffs(1,3);
-%figure(); hold on;
-%plot(x,y);
-%plot(sst3d(:,2,1), sst3d(:,1,1),'x');
-%xlim([-267000,-92000]);
-%ylim([10,50]);
-%hold off;
-
 % trans data
 Tx = trans_data(2:1001,1:8);
 PCx = trans_data(2:1001,9:72);
-%PSTx = zeros(1000,64);
 
 %Tx averages
 T1T2 = sum(Tx(:,1:2),2) ./ 2;
@@ -195,6 +191,7 @@ legend("Ch1","Ch2","Ch3","Ch4","Ch5","Ch6","Ch7","Ch8",'location','southwest');
 grid on;
 hold off;
 
+% ch9 - ch64
 for i = 1:7
    figure(); hold on;
    plot(tempin(:,i*8+1:i*8+8),tCor(:,i*8+1:i*8+8));
@@ -203,16 +200,10 @@ for i = 1:7
    hold off;
 endfor
 
-%try polyfit one channel
-%tCorr_coeffs = zeros(64,5);
-%for k = 1:64
-%    tCorr_coeffs(k,:) = polyfit(tempin(k,:),tCor(k,:),5);
-%endfor
-
-
 % for transient table output CSV
 idx = transpose(linspace(0,427,428));
 transOut = [idx transOut];
 
-csvwrite("TransTable.csv",transOut)
+outfile = [outpDir "TransTable.csv"];
+csvwrite(outfile, transOut);
 
