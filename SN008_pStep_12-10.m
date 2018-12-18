@@ -24,6 +24,7 @@ for i = 1:64
    p_temp(:,i) = p_raw(:,i).^2 .* coeffs(1,i) + p_raw(:,i) .* coeffs(2,i) + coeffs(3,i);
 endfor
 
+% deltas
 d_p14 = abs(p_temp(:,1) - p_temp(:,4));
 d_p58 = abs(p_temp(:,5) - p_temp(:,8));
 d_p912 = abs(p_temp(:,9) - p_temp(:,12));
@@ -35,7 +36,55 @@ d_p2932 = abs(p_temp(:,29) - p_temp(:,32));
 d_t12 = abs(temp_matrix(:,1) - temp_matrix(:,2));
 d_t34 = abs(temp_matrix(:,3) - temp_matrix(:,4));
 
-y = [0,60];
+
+% low pass filter
+fsam = 0.5;
+fnyq = fsam/2;
+flp = fnyq/8
+
+[b,a] = butter(2, flp/fnyq);
+
+%ddt_p1 = diff(p_temp(:,1));
+%ddt_p1 = [ ddt_p1(1) ; ddt_p1 ];
+%
+%figure(); hold on;
+%[hax, h1, h2] = plotyy(time,p_temp(:,1),time,ddt_p1);
+%title("diff(p1temp)");
+%hold off;
+%
+%lp_ddt_p1 = filter(b,a,ddt_p1);
+%
+%figure(); hold on;
+%[hax, h1, h2] = plotyy(time,p_temp(:,1),time,lp_ddt_p1);
+%title("diff(p1temp)");
+%hold off;
+
+% diffeq fit
+y = 50 - 35.*e.^(-0.14.*(time-16));
+figure(); hold on;
+plot(time,y);
+plot(time,temp_matrix(:,1));
+ylim([0,50]);
+grid on;
+hold off;
+
+ddt_t1 = diff(temp_matrix(:,1));
+ddt_t1 = [ ddt_t1(1) ; ddt_t1 ];
+
+figure(); hold on;
+[hax, h1, h2] = plotyy(time,temp_matrix(:,1),time,ddt_t1);
+title("diff(t1temp)");
+hold off;
+
+lp_ddt_t1 = filter(b,a,ddt_t1);
+
+figure(); hold on;
+[hax, h1, h2] = plotyy(time,temp_matrix(:,1),time,lp_ddt_t1);
+title("diff\(t1temp)");
+grid on;
+hold off;
+
+%y = [0,60];
 
 %figure(1); hold on;
 %%subplot(5,1,1); hold on; grid on;
@@ -185,85 +234,85 @@ y = [0,60];
 %grid on;
 %hold off;
 
-% calculate starting offsets
-p1shft = p_temp(1,1) - temp_matrix(1,1);
-p2shft = p_temp(1,2) - temp_matrix(1,1);
-p3shft = p_temp(1,3) - temp_matrix(1,1);
-p5shft = p_temp(1,5) - temp_matrix(1,1);
-p7shft = p_temp(1,7) - temp_matrix(1,1);
-p9shft = p_temp(1,9) - temp_matrix(1,1);
+%% calculate starting offsets
+%p1shft = p_temp(1,1) - temp_matrix(1,1);
+%p2shft = p_temp(1,2) - temp_matrix(1,1);
+%p3shft = p_temp(1,3) - temp_matrix(1,1);
+%p5shft = p_temp(1,5) - temp_matrix(1,1);
+%p7shft = p_temp(1,7) - temp_matrix(1,1);
+%p9shft = p_temp(1,9) - temp_matrix(1,1);
+%
+%% adjusted temps
+%adj_p1_temp = p_temp(:,1) - p1shft;
+%adj_p2_temp = p_temp(:,2) - p2shft;
+%adj_p3_temp = p_temp(:,3) - p3shft;
+%adj_p5_temp = p_temp(:,5) - p5shft;
+%adj_p7_temp = p_temp(:,7) - p7shft;
+%adj_p9_temp = p_temp(:,9) - p9shft;
+%
+%% Px to T1 deltas
+%d_p1t1 = abs(p_temp(:,1) - temp_matrix(:,1));
+%d_p2t1 = abs(p_temp(:,2) - temp_matrix(:,1));
+%d_p3t1 = abs(p_temp(:,3) - temp_matrix(:,1));
+%d_p5t1 = abs(p_temp(:,5) - temp_matrix(:,1));
+%d_p7t1 = abs(p_temp(:,7) - temp_matrix(:,1));
+%d_p9t1 = abs(p_temp(:,9) - temp_matrix(:,1));
+%
+%% adjusted Px to T1 deltas
+%ad_p1t1 = abs(adj_p1_temp - temp_matrix(:,1));
+%ad_p2t1 = abs(adj_p2_temp - temp_matrix(:,1));
+%ad_p3t1 = abs(adj_p3_temp - temp_matrix(:,1));
+%ad_p5t1 = abs(adj_p5_temp - temp_matrix(:,1));
+%ad_p7t1 = abs(adj_p7_temp - temp_matrix(:,1));
+%ad_p9t1 = abs(adj_p9_temp - temp_matrix(:,1));
 
-% adjusted temps
-adj_p1_temp = p_temp(:,1) - p1shft;
-adj_p2_temp = p_temp(:,2) - p2shft;
-adj_p3_temp = p_temp(:,3) - p3shft;
-adj_p5_temp = p_temp(:,5) - p5shft;
-adj_p7_temp = p_temp(:,7) - p7shft;
-adj_p9_temp = p_temp(:,9) - p9shft;
-
-% Px to T1 deltas
-d_p1t1 = abs(p_temp(:,1) - temp_matrix(:,1));
-d_p2t1 = abs(p_temp(:,2) - temp_matrix(:,1));
-d_p3t1 = abs(p_temp(:,3) - temp_matrix(:,1));
-d_p5t1 = abs(p_temp(:,5) - temp_matrix(:,1));
-d_p7t1 = abs(p_temp(:,7) - temp_matrix(:,1));
-d_p9t1 = abs(p_temp(:,9) - temp_matrix(:,1));
-
-% adjusted Px to T1 deltas
-ad_p1t1 = abs(adj_p1_temp - temp_matrix(:,1));
-ad_p2t1 = abs(adj_p2_temp - temp_matrix(:,1));
-ad_p3t1 = abs(adj_p3_temp - temp_matrix(:,1));
-ad_p5t1 = abs(adj_p5_temp - temp_matrix(:,1));
-ad_p7t1 = abs(adj_p7_temp - temp_matrix(:,1));
-ad_p9t1 = abs(adj_p9_temp - temp_matrix(:,1));
-
-figure(11); hold on;
-%subplot(5,1,2); hold on; grid on;
-[hax, h1, h2] = plotyy(time,adj_p1_temp,time,ad_p1t1);
-h3 = plot(time,temp_matrix(:,1));
-%[val idx] = max(d_p14);
-%h4 = plot([time(idx),time(idx)],y);
-legend([h1;h3;h2],"P1 temp","T1 temp","deltaP1\/T1","location","northwest");
-%set(hax, 'xlim',[10,60]);
-set(hax(1), 'ycolor','b');
-set(hax(2), 'ycolor','r');
-set (h1, 'color', 'b');
-set (h2, 'color', 'r');
-set (h3, 'color', 'g');
-title("P1\/T1 temperature delta")
-grid on;
-hold off;
-
-figure(12); hold on;
-%subplot(5,1,2); hold on; grid on;
-[hax, h1, h2] = plotyy(time,adj_p2_temp,time,ad_p2t1);
-h3 = plot(time,temp_matrix(:,1));
-%[val idx] = max(d_p14);
-%h4 = plot([time(idx),time(idx)],y);
-legend([h1;h3;h2],"P2 temp","T1 temp","deltaP1\/T1","location","northwest");
-%set(hax, 'xlim',[10,60]);
-set(hax(1), 'ycolor','b');
-set(hax(2), 'ycolor','r');
-set (h1, 'color', 'b');
-set (h2, 'color', 'r');
-set (h3, 'color', 'g');
-title("P2\/T1 temperature delta")
-grid on;
-hold off;
-
-figure(13); hold on;
-%subplot(5,1,2); hold on; grid on;
-[hax, h1, h2] = plotyy(time,adj_p3_temp,time,ad_p3t1);
-h3 = plot(time,temp_matrix(:,1));
-%[val idx] = max(d_p14);
-%h4 = plot([time(idx),time(idx)],y);
-legend([h1;h3;h2],"P3 temp","T1 temp","deltaP3\/T1","location","northwest");
-%set(hax, 'xlim',[10,60]);
-set(hax(1), 'ycolor','b');
-set(hax(2), 'ycolor','r');
-set (h1, 'color', 'b');
-set (h2, 'color', 'r');
-set (h3, 'color', 'g');
-title("P3\/T1 temperature delta")
-grid on;
-hold off;
+%figure(11); hold on;
+%%subplot(5,1,2); hold on; grid on;
+%[hax, h1, h2] = plotyy(time,adj_p1_temp,time,ad_p1t1);
+%h3 = plot(time,temp_matrix(:,1));
+%%[val idx] = max(d_p14);
+%%h4 = plot([time(idx),time(idx)],y);
+%legend([h1;h3;h2],"P1 temp","T1 temp","deltaP1\/T1","location","northwest");
+%%set(hax, 'xlim',[10,60]);
+%set(hax(1), 'ycolor','b');
+%set(hax(2), 'ycolor','r');
+%set (h1, 'color', 'b');
+%set (h2, 'color', 'r');
+%set (h3, 'color', 'g');
+%title("P1\/T1 temperature delta")
+%grid on;
+%hold off;
+%
+%figure(12); hold on;
+%%subplot(5,1,2); hold on; grid on;
+%[hax, h1, h2] = plotyy(time,adj_p2_temp,time,ad_p2t1);
+%h3 = plot(time,temp_matrix(:,1));
+%%[val idx] = max(d_p14);
+%%h4 = plot([time(idx),time(idx)],y);
+%legend([h1;h3;h2],"P2 temp","T1 temp","deltaP1\/T1","location","northwest");
+%%set(hax, 'xlim',[10,60]);
+%set(hax(1), 'ycolor','b');
+%set(hax(2), 'ycolor','r');
+%set (h1, 'color', 'b');
+%set (h2, 'color', 'r');
+%set (h3, 'color', 'g');
+%title("P2\/T1 temperature delta")
+%grid on;
+%hold off;
+%
+%figure(13); hold on;
+%%subplot(5,1,2); hold on; grid on;
+%[hax, h1, h2] = plotyy(time,adj_p3_temp,time,ad_p3t1);
+%h3 = plot(time,temp_matrix(:,1));
+%%[val idx] = max(d_p14);
+%%h4 = plot([time(idx),time(idx)],y);
+%legend([h1;h3;h2],"P3 temp","T1 temp","deltaP3\/T1","location","northwest");
+%%set(hax, 'xlim',[10,60]);
+%set(hax(1), 'ycolor','b');
+%set(hax(2), 'ycolor','r');
+%set (h1, 'color', 'b');
+%set (h2, 'color', 'r');
+%set (h3, 'color', 'g');
+%title("P3\/T1 temperature delta")
+%grid on;
+%hold off;
