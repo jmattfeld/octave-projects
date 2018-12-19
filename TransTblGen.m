@@ -187,28 +187,48 @@ endfor
 %==============================================
 
 % interpolate tCor data
-x = tempin(1:423,1);
-y = tCor(1:423,1);
+x = tempin(4:421,1);
+y = tCor(4:421,1);
 %xi = linspace(15.38,49.63,50);
 %yin = interp1(x,y,xi,"nearest");
 %yil = interp1(x,y,xi,"linear");
-%%yis = interp1(x,y,xi,"spline");
+%yis = interp1(x,y,xi,"spline");
 %yis = spline(x,y,xi);
 %yip = interp1(x,y,xi,"pchip");
+
+% 5th order fit
 k = polyfit(x,y,5);
-ypoly = k(1).*x.^5 + k(2).*x.^4 + k(3).*x.^3 + k(4).*x.^2 + k(5).*x + k;
+ypoly5 = k(1).*x.^5 + k(2).*x.^4 + k(3).*x.^3 + k(4).*x.^2 + k(5).*x + k(6);
+%% 6th order fit
+%k = polyfit(x,y,6);
+%ypoly6 = k(1).*x.^6 + k(2).*x.^5 + k(3).*x.^4 + k(4).*x.^3 + k(5).*x.^2 + k(6).*x + k(7);
+%% 7th order fit
+%k = polyfit(x,y,7);
+%ypoly7 = k(1).*x.^7 + k(2).*x.^6 + k(3).*x.^5 + k(4).*x.^4 + k(5).*x.^3 + k(6).*x.^2 + k(7).*x + k(8);
+%% 10th order fit
+%k = polyfit(x,y,10);
+%ypoly10 = k(1).*x.^10 + k(2).*x.^9 + k(3).*x.^8 + k(4).*x.^7 + k(5).*x.^6 + k(6).*x.^5 + k(7).*x.^4 + k(8).*x.^3 + k(9).*x.^2 + k(10).*x + k(11);
+
+%err = ypoly10 - ypoly5;
+%maxErr = max(err)
 
 %plot ch1
-figure(); hold on;
-plot(tempin(:,1),tCor(:,1),".");
-%plot(xi,yin);
-%plot(xi,yil);
-%plot(xi,yis);
-%plot(xi,yip);
-plot(x,ypoly);
+f1 = figure(); hold on;
+%plot(tempin(:,1),tCor(:,1),"+");
+plot(x,y,"+");
+plot(x,ypoly5);
+%plot(x,ypoly6);
+%plot(x,ypoly7);
+%plot(x,ypoly10);
+%plot(x,err,'linewidth',2);
 title("P1 temperature correction factor \/wrt input temperature");
+%legend("raw temp correction","5th order fit","6th order fit","7th order fit","10th order fit","accuracy delta \(10th order vs 5th order\)");
+xlabel("temperature input \[C\]");
+ylabel("temperature correction factor \[C\]");
 grid on;
 hold off;
+outfile = [outpDir "tempCorrFit.pdf"];
+print(f1, outfile, "-dpdf");
 
 %%ch1 - ch4
 %figure(); hold on;
