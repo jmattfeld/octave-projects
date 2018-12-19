@@ -182,23 +182,49 @@ for i = 1:64 % for each channel
 
 endfor
 
+%==============================================
 % plot correction curves /wrt input temperature
-%ch1 - ch8
+%==============================================
+
+% interpolate tCor data
+x = tempin(1:423,1);
+y = tCor(1:423,1);
+%xi = linspace(15.38,49.63,50);
+%yin = interp1(x,y,xi,"nearest");
+%yil = interp1(x,y,xi,"linear");
+%%yis = interp1(x,y,xi,"spline");
+%yis = spline(x,y,xi);
+%yip = interp1(x,y,xi,"pchip");
+k = polyfit(x,y,5);
+ypoly = k(1).*x.^5 + k(2).*x.^4 + k(3).*x.^3 + k(4).*x.^2 + k(5).*x + k;
+
+%plot ch1
 figure(); hold on;
-plot(tempin(:,1:8),tCor(:,1:8));
-title("temperature correction factor \/wrt input temperature (Ch1-Ch8)");
-legend("Ch1","Ch2","Ch3","Ch4","Ch5","Ch6","Ch7","Ch8",'location','southwest');
+plot(tempin(:,1),tCor(:,1),".");
+%plot(xi,yin);
+%plot(xi,yil);
+%plot(xi,yis);
+%plot(xi,yip);
+plot(x,ypoly);
+title("P1 temperature correction factor \/wrt input temperature");
 grid on;
 hold off;
 
-% ch9 - ch64
-for i = 1:7
-   figure(); hold on;
-   plot(tempin(:,i*8+1:i*8+8),tCor(:,i*8+1:i*8+8));
-   title("temperature correction factor \/wrt input temperature");
-   grid on;
-   hold off;
-endfor
+%%ch1 - ch4
+%figure(); hold on;
+%plot(tempin(:,1:4),tCor(:,1:4));
+%title("grp1 temperature correction factor \/wrt input temperature (Ch1-Ch4)");
+%legend("Ch1","Ch2","Ch3","Ch4",'location','southwest');
+%grid on;
+%hold off;
+%
+%%ch5 - ch12
+%figure(); hold on;
+%plot(tempin(:,5:12),tCor(:,5:12));
+%title("grp1\/2 temperature correction factor \/wrt input temperature (Ch5-Ch12)");
+%legend("Ch5","Ch6","Ch7","Ch8","Ch9","Ch10","Ch11","Ch12",'location','southwest');
+%grid on;
+%hold off;
 
 % for transient table output CSV
 idx = transpose(linspace(0,427,428));
