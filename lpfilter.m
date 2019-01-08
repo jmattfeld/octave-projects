@@ -6,44 +6,47 @@ clear all; close all;
 pkg load signal;
 
 % declare some path variables
-wkDir = "C:\\Users\\Jeremy.SV\\Documents\\octave-projects\\";
-inpDir = [wkDir "data\\"];
-outpDir = [wkDir "outputs\\"];
+wkDir = "/home/jmattfeld/Source/octave-projects/";
+inpDir = [wkDir "data/"];
+outpDir = [wkDir "outputs/"];
 
 % pos step data
-data_file = [inpDir "SN008_data_pStep_12-10.csv"];
-temps = dlmread(data_file,',',"D2..K3221");
+data_file = [inpDir "Ts_10_50_15.csv"];
+temps = dlmread(data_file,',',"D1..K7299");
 
 % setup time array
-frame = [1:3220];
-ftime = frame*2;
-time = ftime./60;
+frame = [1:7299];
+seconds = frame*2;
+minutes = seconds./60;
 
 % calculate cutoff freq
-fsam = 0.5;
-fnyq = fsam/2;
-flp = fnyq/32
+fs = 0.5;
+fnyq = fs/2;
+fc = fnyq/12
 
 % butterworth low pass filter
-[b,a] = butter(2, flp/fnyq);
+[b,a] = butter(2, fc/fnyq)
+[h,w] = freqz(b,a,512,fs);
 
-% apply butterworth filter with offset
+% apply butterworth filter
 fTemps = filter(b,a,temps(:,1));
 
-% FIR1
-n = 24; % for a filter length of 25
-b = fir1(n,flp)
-fir1Temps = filter(b,1,temps(:,1));
+figure(1); hold on;
+plot(seconds,temps(:,1));
+plot(seconds,fTemps(:,1));
+xlim([4000,13000]);
+ylim([10,60]);
+xlabel("time [s]");
+ylabel("temperature [C]");
+title("comparison of digital signal filters");
+legend("unfiltered signal","butter",'location','southeast');
+grid on;
+hold off;
 
-%figure(1); hold on;
-%plot(time,temps(:,1));
-%%plot(time+1,fTemps(:,1));
-%plot(time,fir1Temps(:,1));
-%title("comparison of digital signal filters");
-%legend("unfiltered signal","fir1 (octave)",'location','southeast');
-%grid on;
-%hold off;
-%
+figure(2); hold on;
+grpdelay(b,a);
+%freqz_plot(w,h);
+
 %% export unfiltered signal for C implementation
 %unfiltered = temps(:,1);
 %outfile = [outpDir "unfiltered.csv"];
