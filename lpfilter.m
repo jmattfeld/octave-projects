@@ -11,30 +11,53 @@ inpDir = [wkDir "data/"];
 outpDir = [wkDir "outputs/"];
 
 % pos step data
-data_file = [inpDir "All_10_50_15_1HzTmpCor.csv"];
-press = dlmread(data_file,',',"Q2..R15063");
+data_file = [inpDir "Ts_10_50_15.csv"];
+temps = dlmread(data_file,',',"D1..K7299");
 
 % setup x array
-frame = [1:15062];
+frame = [1:7299];
+seconds = frame*2;
+minutes = seconds./60;
+
+% calculate time constant
+t_0 = 5700;
+temp_0 = 16.5;
+temp_f = 55.63;
+y_tau = (temp_f - temp_0) * (1 - 1/e) + temp_0;
+
+for i = 1:7299
+	if (temps(i,1) >= y_tau)
+		t_tau = i * 2
+		break
+	endif
+endfor
+
+% this is the time constant
+% for the step response
+tau = t_tau - t_0;
+
+% find -3dB freq (omega_c)
+% this should be our corner frequency
+wc = 1/tau
+fc = 1/(2*pi*tau)
 
 % calculate cutoff freq
-fsam = 0.5;
-fnyq = fsam/2;
-flp = fnyq/48
+fs = 0.5;
+fnyq = fs/2;
 
-% FIR1
-n = 49; % for a filter length of 10
-b = fir1(n,flp);
-fCorPress = filter(b,1,press(:,2));
+% design our 2nd order butterworth filter
+[z,p,k] = butter(2,wc)
+sos = zp2sos(z,p,k)
+b = sos(1:3)
+a = sos(4:6)
+
+fTemp = filtfilt(b,a,temps(:,1));
 
 figure(1); hold on;
-plot(frame,press(:,1),'linewidth',2);
-plot(frame,press(:,2),'linewidth',2);
-plot(frame,fCorPress,'g','linewidth',3);
-title("filtered corrected pressure");
+plot(seconds,temps(:,1));
+plot(seconds,fTemp
+);
 xlim([4000,14000]);
-ylim([14.99,15.02]);
-legend("uncorrected pressure","unfiltered corrected pressure","filtered corrected pressure",'location','southeast');
 grid on;
 hold off;
 
